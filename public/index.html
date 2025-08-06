@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazing Bahrain</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to bottom right, #e63946, #ffb703);
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .logo {
+      width: 180px;
+      height: auto;
+      margin-bottom: 20px;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      animation: fadeIn 2s ease-in-out;
+    }
+
+    .start-btn {
+      background-color: white;
+      color: #e63946;
+      font-size: 1.5rem;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s;
+      animation: fadeIn 3s ease-in-out;
+    }
+
+    .start-btn:hover {
+      background-color: #ffb703;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo Image -->
+  <img src="amazing bahrain.png" alt="Amazing Bahrain Logo" class="logo">
+  
+  <h1>Welcome to Amazing Bahrain</h1>
+  <button class="start-btn" onclick="location.href='form.html'">Start</button>
+
+  <footer>© 2025 Amazing Bahrain | Experience & Win</footer>
+</body>
+</html>

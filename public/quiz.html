@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz - Amazing Bahrain</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      text-align: center;
+      padding: 50px;
+    }
+
+    h2 {
+      color: #fff;
+      margin-bottom: 30px;
+    }
+
+    .question-container {
+      background: rgba(255,255,255,0.9);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .options button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      width: 80%;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s;
+    }
+
+    .options button:hover {
+      background: #45a049;
+    }
+
+    /* Popup */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .popup-content h3 {
+      margin-bottom: 15px;
+    }
+
+    .close-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      background: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Answer the Questions</h2>
+
+  <div class="question-container" id="quizContainer">
+    <p id="questionText"></p>
+    <div class="options" id="optionsContainer"></div>
+  </div>
+
+  <!-- Popup for Wrong Answer -->
+  <div class="popup" id="resultPopup">
+    <div class="popup-content">
+      <h3 id="resultTitle"></h3>
+      <p id="correctAnswer"></p>
+      <button class="close-btn" onclick="closePopup()">Next</button>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() {
+      const questions = [
+        {
+          q: "Which place is famous for the Eiffel Tower?",
+          options: ["Zurich","Paris","London","Sydney"],
+          answer: "Paris"
+        },
+        {
+          q: "Which place is known for the Great Wall?",
+          options: ["Japan","China","Vietnam","Indonesia"],
+          answer: "China"
+        },
+        {
+          q: "Where is the Colosseum located?",
+          options: ["Milan","Venice","Rome","Florence"],
+          answer: "Rome"
+        },
+        {
+          q: "Where can you visit the pyramids of Giza?",
+          options: ["Jordan","Egypt","Iraq","Iran"],
+          answer: "Egypt"
+        },
+        {
+          q: "Which city is famous for the Sydney Opera House?",
+          options: ["Sydney","Auckland","Melbourne","Singapore"],
+          answer: "Sydney"
+        },
+        {
+          q: "Where is the Statue of Liberty located?",
+          options: ["Washington","Florida","New York","Los Angeles"],
+          answer: "New York"
+        }
+      ];
+
+      let currentQuestion = 0;
+      const totalQuestions = questions.length;
+
+      const questionText = document.getElementById("questionText");
+      const optionsContainer = document.getElementById("optionsContainer");
+      const popup = document.getElementById("resultPopup");
+      const resultTitle = document.getElementById("resultTitle");
+      const correctAnswer = document.getElementById("correctAnswer");
+
+      function loadQuestion(index) {
+        const q = questions[index];
+        questionText.innerText = q.q;
+        optionsContainer.innerHTML = "";
+        q.options.forEach(option => {
+          const btn = document.createElement("button");
+          btn.innerText = option;
+          btn.onclick = () => checkAnswer(option);
+          optionsContainer.appendChild(btn);
+        });
+      }
+
+      function checkAnswer(selected) {
+        const correct = questions[currentQuestion].answer;
+        if (selected === correct) {
+          nextQuestion();
+        } else {
+          resultTitle.innerText = "❌ Wrong!";
+          correctAnswer.innerText = "The correct answer is: " + correct;
+          popup.style.display = "flex";
+        }
+      }
+
+      window.closePopup = function() {
+        popup.style.display = "none";
+        nextQuestion();
+      }
+
+      function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < totalQuestions) {
+          loadQuestion(currentQuestion);
+        } else {
+          window.location.href = "scratch.html";
+        }
+      }
+
+      // Load first question after page ready
+      loadQuestion(currentQuestion);
+    };
+  </script>
+</body>
+</html>
