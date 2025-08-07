@@ -103,3 +103,39 @@ app.get('/get-prize', async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
 });
+
+// --- Updated Prize Route ---
+
+app.get('/get-prize', async (req, res) => {
+  try {
+    const prizes = await pool.query('SELECT * FROM prizes WHERE remaining > 0');
+
+    let prizePool = [];
+
+    prizes.rows.forEach(row => {
+      for (let i = 0; i < row.remaining; i++) {
+        prizePool.push(row.name);
+      }
+    });
+
+    // Add extra "Better luck next time" entries
+    for (let i = 0; i < 500; i++) {
+      prizePool.push("Better luck next time");
+    }
+
+    const selectedPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
+
+    if (selectedPrize !== "Better luck next time") {
+      await pool.query(
+        'UPDATE prizes SET remaining = remaining - 1 WHERE name = $1 AND remaining > 0',
+        [selectedPrize]
+      );
+    }
+
+    res.json({ prize: selectedPrize });
+
+  } catch (error) {
+    console.error('❌ Error fetching prize:', error);
+    res.status(500).json({ prize: "Better luck next time" });
+  }
+});
