@@ -13,28 +13,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Prize inventory
-let inventory = {
-  Pen: 200,
-  Cap: 100,
-  Cup: 50
-};
-
-function assignPrize() {
-  if (inventory.Pen > 0) {
-    inventory.Pen--;
-    return "🎁 You won a Pen!";
-  } else if (inventory.Cap > 0) {
-    inventory.Cap--;
-    return "🎁 You won a Cap!";
-  } else if (inventory.Cup > 0) {
-    inventory.Cup--;
-    return "🎁 You won a Cup!";
-  } else {
-    return "😢 Better luck next time!";
-  }
-}
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -54,16 +32,37 @@ pool.query(`
   console.error('❌ Error creating users table:', err);
 });
 
+// Ensure prizes table exists and initialize
+pool.query(`
+  CREATE TABLE IF NOT EXISTS prizes (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE,
+    remaining INTEGER NOT NULL
+  )
+`).then(() => {
+  console.log('✅ Prizes table is ready');
+  return pool.query(`
+    INSERT INTO prizes (name, remaining)
+    VALUES 
+      ('Pen', 200),
+      ('Cap', 100),
+      ('Cup', 50)
+    ON CONFLICT (name) DO NOTHING;
+  `);
+}).catch(err => {
+  console.error('❌ Error setting up prizes:', err);
+});
+
 // Register route
 app.post('/register', async (req, res) => {
-  const { name, phone, email } = req.body;
+  const { name, phone, email = null } = req.body;
   if (!name || !phone) {
     return res.status(400).json({ success: false, message: 'Name and phone are required' });
   }
   try {
     await pool.query(
       'INSERT INTO users (name, email, phone) VALUES ($1, $2, $3)',
-      [name, email || null, phone]
+      [name, email, phone]
     );
     res.status(200).json({ success: true, message: 'User added successfully' });
   } catch (err) {
@@ -76,10 +75,28 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// Prize route
-app.get('/get-prize', (req, res) => {
-  const prize = assignPrize();
-  res.json({ prize });
+// Prize route with random chance and DB inventory tracking
+app.get('/get-prize', async (req, res) => {
+  try {
+    const random = Math.random();
+    if (random < 0.3) {
+      return res.json({ prize: '😢 Better luck next time!' });
+    }
+
+    const prizes = ['Pen', 'Cap', 'Cup'];
+    for (const prize of prizes) {
+      const result = await pool.query('SELECT remaining FROM prizes WHERE name = $1', [prize]);
+      if (result.rows.length > 0 && result.rows[0].remaining > 0) {
+        await pool.query('UPDATE prizes SET remaining = remaining - 1 WHERE name = $1', [prize]);
+        return res.json({ prize: `🎁 You won a ${prize}!` });
+      }
+    }
+
+    res.json({ prize: '😢 Better luck next time!' });
+  } catch (err) {
+    console.error('Prize error:', err);
+    res.status(500).json({ prize: '😢 Better luck next time!' });
+  }
 });
 
 // Start server
