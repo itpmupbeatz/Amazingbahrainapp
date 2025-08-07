@@ -7,16 +7,18 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// PostgreSQL pool setup
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
+// Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Create users table if not exists
+// Ensure users table exists
 pool.query(`
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -25,34 +27,39 @@ pool.query(`
     phone VARCHAR(20) UNIQUE
   )
 `).then(() => {
-  console.log('Users table ensured');
+  console.log('✅ Users table is ready');
 }).catch(err => {
-  console.error('Error creating users table:', err);
+  console.error('❌ Error creating users table:', err);
 });
 
-// DB connection test route
+// Test DB route
 app.get('/db-test', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
-    res.send(result.rows);
+    res.status(200).send(`Database connected! Time: ${result.rows[0].now}`);
   } catch (err) {
-    console.error('Database connection failed:', err);
-    res.status(500).send('DB error');
+    console.error('❌ DB connection failed:', err);
+    res.status(500).send('Database error');
   }
 });
 
-// Handle registration
+// Register route
 app.post('/register', async (req, res) => {
   const { name, phone, email } = req.body;
+
+  if (!name || !phone) {
+    return res.status(400).json({ success: false, message: 'Name and phone are required' });
+  }
+
   try {
     await pool.query(
       'INSERT INTO users (name, email, phone) VALUES ($1, $2, $3)',
-      [name, email, phone]
+      [name, email || null, phone]
     );
     res.status(200).json({ success: true, message: 'User added successfully' });
   } catch (err) {
     if (err.code === '23505') {
-      res.json({ success: false, message: 'Phone number already registered!' });
+      res.status(409).json({ success: false, message: 'Phone number already registered!' });
     } else {
       console.error('Insert error:', err);
       res.status(500).json({ success: false, message: 'Failed to add user' });
@@ -60,6 +67,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// Start server
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`🚀 Server running on port ${port}`);
 });
