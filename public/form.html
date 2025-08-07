@@ -1,110 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registration Form</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
-    }
-    .form-container {
-      background: #fff;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      width: 320px;
-      text-align: center;
-    }
-    input {
-      width: 90%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background: #45a049; }
-    #popup {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-    }
-    .popup-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <div class="form-container">
-    <h2>Register</h2>
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="tel" id="phone" placeholder="Phone Number" required>
-    <input type="email" id="email" placeholder="Email ID (optional)">
-    <button onclick="submitForm()">Submit</button>
-  </div>
+<form id="registrationForm">
+  <input type="text" name="name" placeholder="Name" required />
+  <input type="text" name="phone" placeholder="Phone" required />
+  <input type="email" name="email" placeholder="Email ID (optional)" />
+  <button type="submit">Submit</button>
+</form>
 
-  <div id="popup">
-    <div class="popup-content">
-      <p>Form submitted successfully!</p>
-      <button onclick="goToQuiz()">Continue</button>
-    </div>
-  </div>
+<script>
+  document.getElementById("registrationForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-  <script>
-    async function submitForm() {
-      const name = document.getElementById('name').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const email = document.getElementById('email').value.trim();
+    const formData = new FormData(this);
+    const data = {
+      name: formData.get("name"),
+      phone: formData.get("phone"),
+      email: formData.get("email") || null
+    };
 
-      if (!name || !phone) {
-        alert('Name and phone are required.');
-        return;
+    try {
+      const res = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        alert("Form submitted successfully!");
+        this.reset();
+      } else {
+        alert("Error: " + result.message);
       }
-
-      try {
-        const response = await fetch('/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name, phone, email }),
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          document.getElementById('popup').style.display = 'flex';
-        } else {
-          alert(data.error || 'Something went wrong!');
-        }
-      } catch (error) {
-        console.error(error);
-        alert('Failed to submit form.');
-      }
+    } catch (error) {
+      alert("Failed to submit form.");
+      console.error(error);
     }
-
-    function goToQuiz() {
-      window.location.href = "quiz.html";
-    }
-  </script>
-</body>
-</html>
+  });
+</script>
