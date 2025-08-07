@@ -1,39 +1,90 @@
-<form id="registrationForm">
-  <input type="text" name="name" placeholder="Name" required />
-  <input type="text" name="phone" placeholder="Phone" required />
-  <input type="email" name="email" placeholder="Email ID (optional)" />
-  <button type="submit">Submit</button>
-</form>
 
-<script>
-  document.getElementById("registrationForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const data = {
-      name: formData.get("name"),
-      phone: formData.get("phone"),
-      email: formData.get("email") || null
-    };
-
-    try {
-      const res = await fetch("/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-
-      const result = await res.json();
-
-      if (result.success) {
-        alert("Form submitted successfully!");
-        this.reset();
-      } else {
-        alert("Error: " + result.message);
-      }
-    } catch (error) {
-      alert("Failed to submit form.");
-      console.error(error);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #4ca1af, #c4e0e5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-  });
-</script>
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 300px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Register</h2>
+    <form id="registrationForm">
+      <input type="text" name="name" placeholder="Name" required />
+      <input type="text" name="phone" placeholder="Phone" required />
+      <input type="email" name="email" placeholder="Email ID (optional)" />
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("registrationForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {
+        name: formData.get("name"),
+        phone: formData.get("phone"),
+        email: formData.get("email") || null
+      };
+
+      try {
+        const res = await fetch("/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+          alert("Form submitted successfully!");
+          window.location.href = "/quiz.html";
+        } else {
+          alert("Error: " + result.message);
+        }
+      } catch (error) {
+        alert("Failed to submit form.");
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
