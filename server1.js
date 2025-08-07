@@ -13,28 +13,6 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// Prize inventory
-let inventory = {
-  Pen: 200,
-  Cap: 100,
-  Cup: 50
-};
-
-function assignPrize() {
-  if (inventory.Pen > 0) {
-    inventory.Pen--;
-    return "🎁 You won a Pen!";
-  } else if (inventory.Cap > 0) {
-    inventory.Cap--;
-    return "🎁 You won a Cap!";
-  } else if (inventory.Cup > 0) {
-    inventory.Cup--;
-    return "🎁 You won a Cup!";
-  } else {
-    return "😢 Better luck next time!";
-  }
-}
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -54,12 +32,25 @@ pool.query(`
   console.error('❌ Error creating users table:', err);
 });
 
+// Test DB route
+app.get('/db-test', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.status(200).send(`Database connected! Time: ${result.rows[0].now}`);
+  } catch (err) {
+    console.error('❌ DB connection failed:', err);
+    res.status(500).send('Database error');
+  }
+});
+
 // Register route
 app.post('/register', async (req, res) => {
   const { name, phone, email } = req.body;
+
   if (!name || !phone) {
     return res.status(400).json({ success: false, message: 'Name and phone are required' });
   }
+
   try {
     await pool.query(
       'INSERT INTO users (name, email, phone) VALUES ($1, $2, $3)',
@@ -74,12 +65,6 @@ app.post('/register', async (req, res) => {
       res.status(500).json({ success: false, message: 'Failed to add user' });
     }
   }
-});
-
-// Prize route
-app.get('/get-prize', (req, res) => {
-  const prize = assignPrize();
-  res.json({ prize });
 });
 
 // Start server
