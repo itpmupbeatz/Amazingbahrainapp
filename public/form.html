@@ -59,7 +59,7 @@
     <h2>Register</h2>
     <input type="text" id="name" placeholder="Name" required>
     <input type="tel" id="phone" placeholder="Phone Number" required>
-    <input type="email" id="email" placeholder="Email ID" required>
+    <input type="email" id="email" placeholder="Email ID (optional)">
     <button onclick="submitForm()">Submit</button>
   </div>
 
@@ -71,17 +71,35 @@
   </div>
 
   <script>
-    function submitForm() {
+    async function submitForm() {
       const name = document.getElementById('name').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const email = document.getElementById('email').value.trim();
 
-      if(!name || !phone || !email) {
-        alert('All fields are mandatory!');
+      if (!name || !phone) {
+        alert('Name and phone are required.');
         return;
       }
 
-      document.getElementById('popup').style.display = 'flex';
+      try {
+        const response = await fetch('/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, phone, email }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('popup').style.display = 'flex';
+        } else {
+          alert(data.error || 'Something went wrong!');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Failed to submit form.');
+      }
     }
 
     function goToQuiz() {
